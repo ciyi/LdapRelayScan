@@ -122,10 +122,11 @@ def InternalDomainFromAnonymousLdap(nameserverIp):
 def DoesLdapsCompleteHandshake(dcIp):
   s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   s.settimeout(5)
-  ssl_sock = ssl.wrap_socket(s,
-                            cert_reqs=ssl.CERT_OPTIONAL,
-                            suppress_ragged_eofs=False,
-                            do_handshake_on_connect=False)
+  ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+  ctx.check_hostname = False
+  ctx.verify_mode = ssl.CERT_OPTIONAL
+  ssl_sock = ctx.wrap_socket(
+      s, do_handshake_on_connect=False, suppress_ragged_eofs=False)
   ssl_sock.connect((dcIp, 636))
   try:
     ssl_sock.do_handshake()
